@@ -1,0 +1,20 @@
+# Text-only launch (stable + fast deploy)
+
+Flask==3.0.3
+Werkzeug==3.0.4
+Jinja2==3.1.5
+bootstrap-flask==2.4.0
+
+cryptography==43.0.3
+requests==2.32.3
+PyYAML==6.0.3
+packaging==24.2
+python-dotenv==1.0.1
+
+# ML core pinned to match saved model
+scikit-learn==1.4.2
+joblib==1.4.2
+numpy==1.26.4
+
+# Production server (Render)
+gunicorn==23.0.0                                                                                                               

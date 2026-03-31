@@ -1,0 +1,58 @@
+# ===========================================================
+# Logical Fallacy Detector - Walter E. Ward
+# Production Dependencies (v2025)
+# ===========================================================
+# --- Web Framework ---
+Flask==3.0.3
+waitress==3.0.2
+openai>=1.0.0
+# --- ML Core (MUST match training/export versions) ---
+scikit-learn==1.4.2
+joblib==1.4.2
+numpy==1.26.4
+
+# --- Audio & Video Processing ---
+ffmpeg-python==0.2.0
+moviepy==1.0.3
+pydub==0.25.1
+
+# --- Speech-to-Text (Whisper + Audio Transcription) ---
+openai-whisper==20231117
+soundfile==0.12.1
+torch==2.9.0
+torchaudio==2.9.0
+
+# --- Hugging Face AI Model (Deep Reasoning & Analysis) ---
+transformers==4.57.1
+huggingface-hub==0.35.3
+safetensors==0.6.2
+tokenizers==0.22.1
+
+# --- Language Tools ---
+langdetect==1.0.9
+regex==2025.9.18
+tqdm==4.67.1
+
+# --- HTTP & JSON Utilities ---
+requests==2.32.3
+PyYAML==6.0.3
+fsspec==2025.9.0
+packaging==24.2
+Jinja2==3.1.5
+
+# --- Optional (Admin Panel Template & UI Enhancements) ---
+bootstrap-flask==2.4.0
+
+# --- Production Logging & Error Handling ---
+gunicorn==23.0.0
+colorama==0.4.6
+
+# ===========================================================
+# Notes:
+# - Supports text, audio, and video input (up to 25MB each)
+# - Encrypted local storage for all transcripts/analyses
+# - Secure admin control panel with AES encryption
+# - Hugging Face model integration (requires HF_API_TOKEN)
+# - Runs production-ready on Waitress (Windows) or Gunicorn (Linux)
+# ===========================================================
+gunicorn

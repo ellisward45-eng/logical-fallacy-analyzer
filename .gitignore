@@ -1,0 +1,45 @@
+# Secrets
+.env
+.env.*
+*.key
+secret.key
+encryption.key
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+
+# Local / OS junk
+desktop.ini
+.DS_Store
+Thumbs.db
+
+# Uploads / generated files
+uploads/
+transcriptions/
+transcripts/
+
+# Large media / samples (don't deploy)
+*.mp4
+*.wav
+
+# Local databases
+*.db
+
+# Big ML artifacts (deploy later via storage/CDN if needed)
+*.joblib
+
+# Random scratch
+New Text Document.txt
+cd
+python
+type
+logical_fallacy_full_dataset.csv
+test_audio.py
+test_text.py
+test_video.py
