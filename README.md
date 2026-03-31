@@ -1,3 +1,22 @@
+## 🚀 Current Deployment Status
+
+### Production (Live Version)
+- Text-based logical fallacy detection
+- AI reasoning via OpenAI API
+- Confidence scoring
+- Simple explanations (5th–8th grade level)
+- Admin login system
+- Optional email alerts
+
+### Experimental / In Progress
+- Audio transcription analysis
+- Video transcription analysis
+- Local ML model experiments
+- Multi-modal expansion
+
+⚠️ Audio and video components are present in the repository for development purposes but are not currently active in the deployed web application.
+
+
 # 🧠 Logical Fallacy Detector
 ### By **Walter E. Ward**  
 #### Secure AI Reasoning and Analysis System (2025 Edition)
