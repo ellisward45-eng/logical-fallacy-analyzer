@@ -315,11 +315,8 @@ def admin_logout():
 # --------------------------------------------------------------------
 # ðŸ§  FALLACY DETECTION (kept as-is; thresholds can be env-configured later)
 # --------------------------------------------------------------------
-DEFAULT_THRESHOLD = float(_env("DEFAULT_THRESHOLD", "0.10") or "0.10")
-
 @app.route("/analyze", methods=["POST"])
 def analyze():
-    import re  # local import so you don't touch top imports
     from ai_reasoning_engine import analyze_fallacy_json
 
     data = request.get_json(silent=True) or {}
@@ -328,35 +325,27 @@ def analyze():
     if not text:
         return jsonify({"fallacies": [], "message": "Please enter text to analyze."}), 400
 
-    # Split into sentences
-    sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", text) if s.strip()]
-    fallacies = []
+    result = analyze_fallacy_json(text)
 
-    for sentence in sentences:
-        result = analyze_fallacy_json(sentence)  # returns dict
+    analysis = result.get("analysis", [])
+    formatted = []
 
-        if not result or result.get("fallacy") in (None, "", "none", "No logical fallacy detected"):
-            continue
+    for item in analysis:
+        sentence = item.get("sentence", "").strip()
+        fallacies = item.get("fallacies", [])
 
-        confidence = (result.get("confidence") or "Medium").strip().title()
-        if confidence not in ("High", "Medium", "Low"):
-            confidence = "Medium"
+        for f in fallacies:
+            formatted.append({
+                "sentence": sentence,
+                "label": f.get("name", "Unknown"),
+                "percent": int(f.get("confidence", 0)),
+                "explanation": (f.get("explanation") or "").strip()
+            })
 
-        # App-friendly percent (not â€œraw model probabilityâ€)
-        percent = 100.0 if confidence == "High" else (70.0 if confidence == "Medium" else 40.0)
-
-        fallacies.append({
-            "label": result.get("fallacy", "Unknown"),
-            "confidence": confidence,
-            "percent": percent,
-            "explanation": (result.get("explanation") or "").strip(),
-            "sentence": sentence,
-        })
-
-    if not fallacies:
+    if not formatted:
         return jsonify({"fallacies": [], "message": "No logical fallacies detected."})
 
-    return jsonify({"fallacies": fallacies})
+    return jsonify({"fallacies": formatted})
     
 
 
