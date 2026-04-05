@@ -13,6 +13,8 @@ from typing import Optional
 import joblib
 from cryptography.fernet import Fernet
 from flask import Flask, jsonify, redirect, render_template, request, session, url_for
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from huggingface_hub import login
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
@@ -57,6 +59,11 @@ def _is_production() -> bool:
 # ðŸ§  APP CONFIGURATION
 # ------------------------------------------------------------
 app = Flask(__name__, template_folder="templates")
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["200 per day", "50 per hour"]
+)
 
 # Secret key MUST be env var in production
 if _is_production():
@@ -316,8 +323,10 @@ def admin_logout():
 # ðŸ§  FALLACY DETECTION (kept as-is; thresholds can be env-configured later)
 # --------------------------------------------------------------------
 @app.route("/analyze", methods=["POST"])
+@limiter.limit("10 per minute")
 def analyze():
     from ai_reasoning_engine import analyze_fallacy_json
+    import re
 
     data = request.get_json(silent=True) or {}
     text = (data.get("text") or "").strip()
@@ -325,22 +334,30 @@ def analyze():
     if not text:
         return jsonify({"fallacies": [], "message": "Please enter text to analyze."}), 400
 
-    result = analyze_fallacy_json(text)
+    # Split into sentences
+    sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", text) if s.strip()]
 
-    analysis = result.get("analysis", [])
     formatted = []
 
-    for item in analysis:
-        sentence = item.get("sentence", "").strip()
-        fallacies = item.get("fallacies", [])
+    for sentence in sentences:
+        result = analyze_fallacy_json(sentence)
+        analysis = result.get("analysis", [])
 
-        for f in fallacies:
-            formatted.append({
-                "sentence": sentence,
-                "label": f.get("name", "Unknown"),
-                "percent": int(f.get("confidence", 0)),
-                "explanation": (f.get("explanation") or "").strip()
-            })
+        for item in analysis:
+            fallacies = item.get("fallacies", [])
+
+            for f in fallacies:
+                formatted.append({
+                    "sentence": sentence,
+                    "label": f.get("name", "Unknown"),
+                    "percent": int(f.get("confidence", 0)),
+                    "explanation": (f.get("explanation") or "").strip()
+                })
+
+    if not formatted:
+        return jsonify({"fallacies": [], "message": "No logical fallacies detected."})
+
+    return jsonify({"fallacies": formatted})
 
     if not formatted:
         return jsonify({"fallacies": [], "message": "No logical fallacies detected."})
