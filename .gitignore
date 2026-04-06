@@ -32,7 +32,7 @@ transcripts/
 *.db
 
 # Big ML artifacts (deploy later via storage/CDN if needed)
-*.joblib
+# *.joblib
 
 # Random scratch
 New Text Document.txt
