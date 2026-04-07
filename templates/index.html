@@ -1,149 +1,195 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
+
 <title>Spot the Lie?</title>
+
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
+<link rel="icon" href="https://cdn-icons-png.flaticon.com/512/1828/1828843.png">
+
 <style>
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 20px;
-    background-color: #f4f6f8;
+
+body{
+font-family: Arial, sans-serif;
+max-width: 720px;
+margin:auto;
+padding:20px;
+background:#f5f5f5;
 }
 
-.container {
-    max-width: 700px;
-    margin: auto;
-    background: white;
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+h1{
+text-align:center;
 }
 
-h1 {
-    text-align: center;
-    margin-bottom: 10px;
+textarea{
+width:100%;
+height:140px;
+padding:12px;
+font-size:16px;
+border-radius:6px;
+border:1px solid #ccc;
 }
 
-.subtitle {
-    text-align: center;
-    color: #666;
-    margin-bottom: 20px;
+button{
+padding:10px 16px;
+margin-top:10px;
+border:none;
+background:#222;
+color:white;
+border-radius:6px;
+cursor:pointer;
 }
 
-textarea {
-    width: 100%;
-    min-height: 160px;
-    padding: 12px;
-    font-size: 16px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    resize: vertical;
-    box-sizing: border-box;
+button:hover{
+background:#444;
 }
 
-button {
-    width: 100%;
-    padding: 14px;
-    font-size: 16px;
-    margin-top: 15px;
-    border: none;
-    border-radius: 6px;
-    background-color: #2d6cdf;
-    color: white;
-    cursor: pointer;
+#result{
+margin-top:20px;
+padding:15px;
+background:white;
+border-radius:8px;
+white-space:pre-wrap;
 }
 
-button:hover {
-    background-color: #1f4fa8;
+.example{
+background:#e9e9e9;
+padding:8px;
+margin:6px 0;
+border-radius:6px;
+cursor:pointer;
 }
 
-.results {
-    margin-top: 25px;
-    padding: 15px;
-    background: #f9fafb;
-    border-radius: 6px;
-    white-space: pre-wrap;
-    min-height: 60px;
+.example:hover{
+background:#dcdcdc;
 }
 
-.footer {
-    text-align: center;
-    font-size: 12px;
-    color: #888;
-    margin-top: 20px;
+.notice{
+margin-top:8px;
+font-size:14px;
+color:#555;
 }
+
+.tools{
+margin-top:12px;
+}
+
 </style>
+
 </head>
 
 <body>
 
-<div class="container">
-    <h1>Spot the Lie?</h1>
-<p>Analyze statements and uncover flawed reasoning.</p>
+<h1>Spot the Lie?</h1>
 
-    <textarea id="textInput" placeholder="Paste your text here..."></textarea>
-    <button onclick="analyzeText()">Analyze</button>
+<p>
+Analyze statements and uncover flawed reasoning.
+</p>
 
-    <div class="results" id="results"></div>
+<textarea id="inputText" placeholder="Paste a message or statement..."></textarea>
 
-    <div class="footer">
-        Text-only launch. Audio/video coming soon.
-    </div>
+<button onclick="runAnalysis()">Analyze</button>
+
+<div class="notice">
+Free daily analyses available
+</div>
+
+<h3>Examples</h3>
+
+<div class="example" onclick="insertExample(this)">
+You're either with us or against us.
+</div>
+
+<div class="example" onclick="insertExample(this)">
+Everyone agrees, so it must be true.
+</div>
+
+<div class="example" onclick="insertExample(this)">
+If we allow this, society will collapse.
+</div>
+
+<div class="example" onclick="insertExample(this)">
+Only an idiot would disagree.
+</div>
+
+<div id="result"></div>
+
+<div class="tools">
+
+<button onclick="copyResult()">Copy result</button>
+
+<button onclick="copyLink()">Copy link</button>
+
 </div>
 
 <script>
-function formatResults(data) {
-  if (!data || !data.fallacies) return "Unexpected response.";
 
-  if (data.fallacies.length === 0) {
-    return data.message || "No logical fallacies detected.";
-  }
+async function runAnalysis(){
 
-  let out = "Detected Fallacies:\n\n";
-  for (const f of data.fallacies) {
-    const label = f.label || "Unknown";
-    const percent = (typeof f.percent === "number") ? `${f.percent.toFixed(1)}%` : "";
-    const sentence = f.sentence ? `Found in: “${f.sentence}”\n` : "";
-    const explanation = f.explanation ? `Explanation: ${f.explanation}\n` : "";
+const text=document.getElementById("inputText").value;
 
-    out += `${label} — ${percent}\n${sentence}${explanation}\n`;
-  }
-  return out.trim();
+if(!text.trim()){
+alert("enter text");
+return;
 }
 
-async function analyzeText() {
-  const text = document.getElementById("textInput").value;
-  const resultsEl = document.getElementById("results");
+const response=await fetch("/analyze",{
 
-  if (!text.trim()) {
-    alert("Please enter text to analyze.");
-    return;
-  }
+method:"POST",
 
-  resultsEl.textContent = "Analyzing...";
+headers:{
+"Content-Type":"application/json"
+},
 
-  try {
-    const response = await fetch("/analyze", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text })
-    });
+body:JSON.stringify({text:text})
 
-    const data = await response.json();
+});
 
-    if (!response.ok) {
-      resultsEl.textContent = data?.message || data?.error || "Error processing request.";
-      return;
-    }
+const data=await response.json();
 
-    resultsEl.textContent = formatResults(data);
-  } catch (e) {
-    resultsEl.textContent = "Could not connect to the analyzer.";
-  }
+document.getElementById("result").innerText=
+JSON.stringify(data,null,2);
+
 }
+
+function insertExample(el){
+
+document.getElementById("inputText").value=el.innerText;
+
+}
+
+function copyResult(){
+
+const text=document.getElementById("result").innerText;
+
+navigator.clipboard.writeText(text);
+
+alert("result copied");
+
+}
+
+function copyLink(){
+
+navigator.clipboard.writeText(window.location.href);
+
+alert("link copied");
+
+}
+
 </script>
+
+<div style="margin-top:30px;font-size:14px;color:#666;text-align:center">
+
+<a href="/terms">Terms</a> |
+<a href="/privacy">Privacy</a> |
+<a href="/disclaimer">Disclaimer</a>
+
+</div>
+
 </body>
+
 </html>
