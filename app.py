@@ -12,7 +12,7 @@ from typing import Optional
 
 import joblib
 from cryptography.fernet import Fernet
-from flask import Flask, jsonify, redirect, render_template, request, session, url_for
+from flask import Flask, request, jsonify, render_template
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from huggingface_hub import login
@@ -383,7 +383,19 @@ if __name__ == "__main__":
     port = int(_env("PORT", "5000") or "5000")
     serve(app, host=host, port=port)
 
+@app.route("/terms")
+def terms():
+    return render_template("terms.html")
 
+
+@app.route("/privacy")
+def privacy():
+    return render_template("privacy.html")
+
+
+@app.route("/disclaimer")
+def disclaimer():
+    return render_template("disclaimer.html")
 
 
 
