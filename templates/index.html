@@ -247,48 +247,65 @@
         });
     }
 
-    function asArray(value) {
-      return Array.isArray(value) ? value : [];
-    }
-
     function normalizeResult(data, originalText) {
-      const rawItems = asArray(data.sentences || data.results || data.analyses || data.analysis);
+      let items = [];
 
-      const items = rawItems.map(function(item, index) {
-        const rawFallacies = asArray(item.fallacies || item.detected_fallacies || item.labels);
+      if (Array.isArray(data.fallacies)) {
+        items = data.fallacies.map(function(item, index) {
+          const label = item.label || "Unknown";
+          const confidenceValue = Number(item.percent ?? item.confidence ?? 0);
 
-        const fallacies = rawFallacies.map(function(fallacy) {
-          if (typeof fallacy === "string") {
-            return fallacy;
-          }
-          return fallacy && (fallacy.name || fallacy.label) ? (fallacy.name || fallacy.label) : "Unknown";
+          return {
+            number: index + 1,
+            sentence: item.sentence || "",
+            fallacies: [label],
+            confidence: Number.isFinite(confidenceValue) ? Math.round(confidenceValue) : 0,
+            explanation: item.explanation || ""
+          };
         });
+      } else if (Array.isArray(data.sentences)) {
+        items = data.sentences.map(function(item, index) {
+          const rawFallacies = Array.isArray(item.fallacies) ? item.fallacies : [];
+          const fallacies = rawFallacies.map(function(fallacy) {
+            if (typeof fallacy === "string") {
+              return fallacy;
+            }
+            if (fallacy && (fallacy.name || fallacy.label)) {
+              return fallacy.name || fallacy.label;
+            }
+            return "Unknown";
+          });
 
-        const confidenceValue = Number(
-          item.confidence_percentage ?? item.confidence ?? item.score ?? 0
-        );
+          const confidenceValue = Number(
+            item.confidence_percentage ?? item.confidence ?? item.score ?? item.percent ?? 0
+          );
 
-        return {
-          number: index + 1,
-          sentence: item.sentence || item.text || item.statement || "",
-          fallacies: fallacies,
-          confidence: Number.isFinite(confidenceValue) ? Math.round(confidenceValue) : 0,
-          explanation: item.explanation || item.reasoning || item.details || ""
-        };
-      });
+          return {
+            number: index + 1,
+            sentence: item.sentence || item.text || item.statement || "",
+            fallacies: fallacies,
+            confidence: Number.isFinite(confidenceValue) ? Math.round(confidenceValue) : 0,
+            explanation: item.explanation || item.reasoning || item.details || ""
+          };
+        });
+      }
 
       const totalFallacies = items.reduce(function(total, item) {
         return total + item.fallacies.length;
       }, 0);
 
-      const summaryText = data.summary ||
-        data.overview ||
-        (
-          items.length > 0
-            ? "Detected " + totalFallacies + " possible fallacy" + (totalFallacies === 1 ? "" : "ies") +
-              " across " + items.length + " sentence" + (items.length === 1 ? "" : "s") + "."
-            : "No sentence analysis was returned."
-        );
+      let summaryText = "";
+      if (data.summary) {
+        summaryText = data.summary;
+      } else if (data.overview) {
+        summaryText = data.overview;
+      } else if (items.length > 0) {
+        summaryText =
+          "Detected " + totalFallacies + " possible fallacy" + (totalFallacies === 1 ? "" : "ies") +
+          " across " + items.length + " sentence" + (items.length === 1 ? "" : "s") + ".";
+      } else {
+        summaryText = "No sentence analysis was returned.";
+      }
 
       return {
         input: data.original_text || data.input || originalText,
@@ -335,7 +352,7 @@
           html += '<div class="sentence-text">' + escapeHtml(item.sentence) + '</div>';
 
           html += '<div class="fallacy-list">';
-          if (item.fallacies.length) {
+          if (item.fallacies.length > 0) {
             item.fallacies.forEach(function(fallacy) {
               html += '<span class="fallacy-tag">' + escapeHtml(titleCase(fallacy)) + '</span>';
             });
