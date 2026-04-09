@@ -334,6 +334,13 @@ def analyze():
     if not text:
         return jsonify({"fallacies": [], "message": "Please enter text to analyze."}), 400
 
+    word_count = len(text.split())
+    if word_count > 300:
+        return jsonify({
+            "fallacies": [],
+            "message": "Maximum 300 words per analyze."
+        }), 400
+
     sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", text) if s.strip()]
 
     if len(sentences) > 10:

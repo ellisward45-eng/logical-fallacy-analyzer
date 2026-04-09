@@ -437,7 +437,7 @@
         const data = await response.json();
 
         if (!response.ok) {
-          const message = data && data.error ? data.error : "Analysis failed.";
+          const message = data && (data.error || data.message) ? (data.error || data.message) : "Analysis failed.";
           document.getElementById("result").innerHTML =
             '<div class="error-box">' + escapeHtml(message) + '</div>';
           latestPlainTextResult = "";
