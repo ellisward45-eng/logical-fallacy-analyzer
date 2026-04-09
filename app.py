@@ -334,8 +334,13 @@ def analyze():
     if not text:
         return jsonify({"fallacies": [], "message": "Please enter text to analyze."}), 400
 
-    # Split into sentences
     sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", text) if s.strip()]
+
+    if len(sentences) > 10:
+        return jsonify({
+            "fallacies": [],
+            "message": "Maximum 10 sentences per analyze."
+        }), 400
 
     formatted = []
 
