@@ -315,7 +315,7 @@ def admin_delete(f):
 
 @app.route("/admin/logout")
 def admin_logout():
-    session.clear()
+    session.pop("logged_in", None)
     return redirect(url_for("admin_login"))
 
 
