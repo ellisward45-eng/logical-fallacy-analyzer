@@ -377,12 +377,11 @@ def analyze():
 
     return jsonify({"fallacies": formatted})
     
-
-
 @app.route("/", methods=["GET"])
 def home():
     return render_template("index.html")
- 
+
+
 @app.route("/healthz", methods=["GET"])
 def healthz():
     try:
@@ -391,10 +390,6 @@ def healthz():
     except Exception as e:
         return jsonify({"status": "error", "detail": str(e)}), 500
 
-if __name__ == "__main__":
-    host = _env("HOST", "0.0.0.0") or "0.0.0.0"
-    port = int(_env("PORT", "5000") or "5000")
-    serve(app, host=host, port=port)
 
 @app.route("/terms")
 def terms():
@@ -410,6 +405,11 @@ def privacy():
 def disclaimer():
     return render_template("disclaimer.html")
 
+
+if __name__ == "__main__":
+    host = _env("HOST", "0.0.0.0") or "0.0.0.0"
+    port = int(_env("PORT", "5000") or "5000")
+    serve(app, host=host, port=port)
 
 
 
