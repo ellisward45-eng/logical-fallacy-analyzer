@@ -71,6 +71,9 @@ if _is_production():
 else:
     app.secret_key = _env("APP_SECRET_KEY", "dev-only-insecure-fallback") or "dev-only-insecure-fallback"
 
+ADMIN_SESSION_KEY = "logged_in"
+CUSTOMER_SESSION_KEY = "customer_email"
+
 
 # Directories (env override allowed)
 UPLOAD_DIR = _env("UPLOAD_DIR", "uploads") or "uploads"
@@ -372,10 +375,7 @@ def analyze():
 
     return jsonify({"fallacies": formatted})
 
-    if not formatted:
-        return jsonify({"fallacies": [], "message": "No logical fallacies detected."})
-
-    return jsonify({"fallacies": formatted})
+ 
     
 @app.route("/", methods=["GET"])
 def home():
