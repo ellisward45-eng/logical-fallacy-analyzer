@@ -74,6 +74,30 @@ else:
 ADMIN_SESSION_KEY = "logged_in"
 CUSTOMER_SESSION_KEY = "customer_email"
 
+CUSTOMER_DATA_FILE = Path("customer_accounts.json")
+
+
+def load_customer_accounts() -> dict:
+    if not CUSTOMER_DATA_FILE.exists():
+        return {}
+
+    try:
+        with CUSTOMER_DATA_FILE.open("r", encoding="utf-8") as f:
+            data = json.load(f)
+            return data if isinstance(data, dict) else {}
+    except (json.JSONDecodeError, OSError):
+        return {}
+
+
+def save_customer_accounts(accounts: dict) -> None:
+    with CUSTOMER_DATA_FILE.open("w", encoding="utf-8") as f:
+        json.dump(accounts, f, indent=2)
+
+
+def get_customer_by_email(email: str) -> Optional[dict]:
+    accounts = load_customer_accounts()
+    return accounts.get(email.strip().lower())
+
 
 # Directories (env override allowed)
 UPLOAD_DIR = _env("UPLOAD_DIR", "uploads") or "uploads"
