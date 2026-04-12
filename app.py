@@ -430,6 +430,29 @@ def customer_logout():
     session.pop(CUSTOMER_SESSION_KEY, None)
     return redirect(url_for("home"))
 
+@app.route("/account")
+def customer_account():
+    customer_email = session.get(CUSTOMER_SESSION_KEY)
+
+    if not customer_email:
+        return redirect(url_for("customer_login"))
+
+    account = get_customer_by_email(customer_email)
+    if not account:
+        session.pop(CUSTOMER_SESSION_KEY, None)
+        return redirect(url_for("customer_login"))
+
+    return render_template_string(
+        """
+        <h2>My Account</h2>
+        <p><strong>Email:</strong> {{ email }}</p>
+        <p><strong>Credits:</strong> {{ credits }}</p>
+        <p><a href="/logout">Logout</a></p>
+        """,
+        email=account["email"],
+        credits=account.get("credits", 0),
+    )
+
 
 # --------------------------------------------------------------------
 # ðŸ§  FALLACY DETECTION (kept as-is; thresholds can be env-configured later)
