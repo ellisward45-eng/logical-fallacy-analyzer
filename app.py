@@ -115,6 +115,18 @@ def create_customer_account(email: str, password: str) -> dict:
     save_customer_accounts(accounts)
     return account
 
+def authenticate_customer(email: str, password: str) -> Optional[dict]:
+    account = get_customer_by_email(email)
+
+    if not account:
+        return None
+
+    password_hash = account.get("password_hash", "")
+    if not password_hash or not check_password_hash(password_hash, password):
+        return None
+
+    return account
+
 
 # Directories (env override allowed)
 UPLOAD_DIR = _env("UPLOAD_DIR", "uploads") or "uploads"
