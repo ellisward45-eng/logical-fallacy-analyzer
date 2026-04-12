@@ -98,6 +98,23 @@ def get_customer_by_email(email: str) -> Optional[dict]:
     accounts = load_customer_accounts()
     return accounts.get(email.strip().lower())
 
+def create_customer_account(email: str, password: str) -> dict:
+    normalized_email = email.strip().lower()
+    accounts = load_customer_accounts()
+
+    if normalized_email in accounts:
+        raise ValueError("An account with that email already exists.")
+
+    account = {
+        "email": normalized_email,
+        "password_hash": generate_password_hash(password),
+        "credits": 0
+    }
+
+    accounts[normalized_email] = account
+    save_customer_accounts(accounts)
+    return account
+
 
 # Directories (env override allowed)
 UPLOAD_DIR = _env("UPLOAD_DIR", "uploads") or "uploads"
