@@ -425,6 +425,11 @@ def customer_login():
     </form>
     """
 
+@app.route("/logout")
+def customer_logout():
+    session.pop(CUSTOMER_SESSION_KEY, None)
+    return redirect(url_for("home"))
+
 
 # --------------------------------------------------------------------
 # ðŸ§  FALLACY DETECTION (kept as-is; thresholds can be env-configured later)
