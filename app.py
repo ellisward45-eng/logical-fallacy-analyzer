@@ -374,6 +374,32 @@ def admin_logout():
     session.pop("logged_in", None)
     return redirect(url_for("admin_login"))
 
+@app.route("/signup", methods=["GET", "POST"])
+def customer_signup():
+    if request.method == "POST":
+        email = (request.form.get("email") or "").strip().lower()
+        password = request.form.get("password") or ""
+
+        if not email or not password:
+            return "Email and password are required.", 400
+
+        try:
+            create_customer_account(email, password)
+        except ValueError as exc:
+            return str(exc), 400
+
+        session[CUSTOMER_SESSION_KEY] = email
+        return redirect(url_for("home"))
+
+    return """
+    <h2>Create Account</h2>
+    <form method="post">
+      Email:<br><input type="email" name="email"><br>
+      Password:<br><input type="password" name="password"><br><br>
+      <button type="submit">Create Account</button>
+    </form>
+    """
+
 
 # --------------------------------------------------------------------
 # ðŸ§  FALLACY DETECTION (kept as-is; thresholds can be env-configured later)
