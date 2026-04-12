@@ -3,6 +3,7 @@ import json
 import os
 import smtplib
 import uuid
+import sqlite3
 from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -73,47 +74,80 @@ else:
 
 ADMIN_SESSION_KEY = "logged_in"
 CUSTOMER_SESSION_KEY = "customer_email"
-
-CUSTOMER_DATA_FILE = Path("customer_accounts.json")
-
-
-def load_customer_accounts() -> dict:
-    if not CUSTOMER_DATA_FILE.exists():
-        return {}
-
-    try:
-        with CUSTOMER_DATA_FILE.open("r", encoding="utf-8") as f:
-            data = json.load(f)
-            return data if isinstance(data, dict) else {}
-    except (json.JSONDecodeError, OSError):
-        return {}
+CUSTOMER_DB_PATH = Path(
+    _env(
+        "CUSTOMER_DB_PATH",
+        "/var/data/customer_accounts.db" if _is_production() else "customer_accounts.db",
+    )
+    or ("/var/data/customer_accounts.db" if _is_production() else "customer_accounts.db")
+)
 
 
-def save_customer_accounts(accounts: dict) -> None:
-    with CUSTOMER_DATA_FILE.open("w", encoding="utf-8") as f:
-        json.dump(accounts, f, indent=2)
+def get_customer_db_connection() -> sqlite3.Connection:
+    CUSTOMER_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    connection = sqlite3.connect(CUSTOMER_DB_PATH)
+    connection.row_factory = sqlite3.Row
+    return connection
+
+
+def init_customer_account_store() -> None:
+    with get_customer_db_connection() as connection:
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS customer_accounts (
+                email TEXT PRIMARY KEY,
+                password_hash TEXT NOT NULL,
+                credits INTEGER NOT NULL DEFAULT 0
+            )
+            """
+        )
+        connection.commit()
 
 
 def get_customer_by_email(email: str) -> Optional[dict]:
-    accounts = load_customer_accounts()
-    return accounts.get(email.strip().lower())
+    normalized_email = email.strip().lower()
+
+    with get_customer_db_connection() as connection:
+        row = connection.execute(
+            "SELECT email, password_hash, credits FROM customer_accounts WHERE email = ?",
+            (normalized_email,),
+        ).fetchone()
+
+    return dict(row) if row else None
+
 
 def create_customer_account(email: str, password: str) -> dict:
     normalized_email = email.strip().lower()
-    accounts = load_customer_accounts()
 
-    if normalized_email in accounts:
-        raise ValueError("An account with that email already exists.")
+    with get_customer_db_connection() as connection:
+        existing = connection.execute(
+            "SELECT 1 FROM customer_accounts WHERE email = ?",
+            (normalized_email,),
+        ).fetchone()
 
-    account = {
-        "email": normalized_email,
-        "password_hash": generate_password_hash(password),
-        "credits": 0
+        if existing:
+            raise ValueError("An account with that email already exists.")
+
+        account = {
+            "email": normalized_email,
+            "password_hash": generate_password_hash(password),
+            "credits": 0,
+        }
+
+        connection.execute(
+            """
+            INSERT INTO customer_accounts (email, password_hash, credits)
+            VALUES (?, ?, ?)
+            """,
+            (account["email"], account["password_hash"], account["credits"]),
+        )
+        connection.commit()
+
+    return {
+        "email": account["email"],
+        "credits": account["credits"],
     }
 
-    accounts[normalized_email] = account
-    save_customer_accounts(accounts)
-    return account
 
 def authenticate_customer(email: str, password: str) -> Optional[dict]:
     account = get_customer_by_email(email)
@@ -125,9 +159,13 @@ def authenticate_customer(email: str, password: str) -> Optional[dict]:
     if not password_hash or not check_password_hash(password_hash, password):
         return None
 
-    return account
+    return {
+        "email": account["email"],
+        "credits": account.get("credits", 0),
+    }
 
 
+init_customer_account_store()
 # Directories (env override allowed)
 UPLOAD_DIR = _env("UPLOAD_DIR", "uploads") or "uploads"
 TRANSCRIPT_DIR = _env("TRANSCRIPT_DIR", "transcriptions") or "transcriptions"
