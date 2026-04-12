@@ -400,6 +400,31 @@ def customer_signup():
     </form>
     """
 
+@app.route("/login", methods=["GET", "POST"])
+def customer_login():
+    if request.method == "POST":
+        email = (request.form.get("email") or "").strip().lower()
+        password = request.form.get("password") or ""
+
+        if not email or not password:
+            return "Email and password are required.", 400
+
+        account = authenticate_customer(email, password)
+        if not account:
+            return "Invalid email or password.", 401
+
+        session[CUSTOMER_SESSION_KEY] = account["email"]
+        return redirect(url_for("home"))
+
+    return """
+    <h2>Customer Login</h2>
+    <form method="post">
+      Email:<br><input type="email" name="email"><br>
+      Password:<br><input type="password" name="password"><br><br>
+      <button type="submit">Login</button>
+    </form>
+    """
+
 
 # --------------------------------------------------------------------
 # ðŸ§  FALLACY DETECTION (kept as-is; thresholds can be env-configured later)
