@@ -192,6 +192,35 @@ def add_customer_credits(email: str, credits_to_add: int) -> dict:
         "credits": new_credit_total,
     }
 
+def deduct_customer_credit(email: str) -> dict:
+    normalized_email = email.strip().lower()
+
+    with get_customer_db_connection() as connection:
+        existing = connection.execute(
+            "SELECT email, credits FROM customer_accounts WHERE email = ?",
+            (normalized_email,),
+        ).fetchone()
+
+        if not existing:
+            raise ValueError("Customer account not found.")
+
+        current_credits = int(existing["credits"])
+        if current_credits <= 0:
+            raise ValueError("You do not have enough credits.")
+
+        new_credit_total = current_credits - 1
+
+        connection.execute(
+            "UPDATE customer_accounts SET credits = ? WHERE email = ?",
+            (new_credit_total, normalized_email),
+        )
+        connection.commit()
+
+    return {
+        "email": normalized_email,
+        "credits": new_credit_total,
+    }
+
 
 init_customer_account_store()
 # Directories (env override allowed)
