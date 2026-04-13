@@ -164,6 +164,34 @@ def authenticate_customer(email: str, password: str) -> Optional[dict]:
         "credits": account.get("credits", 0),
     }
 
+def add_customer_credits(email: str, credits_to_add: int) -> dict:
+    normalized_email = email.strip().lower()
+
+    if credits_to_add <= 0:
+        raise ValueError("Credits to add must be greater than zero.")
+
+    with get_customer_db_connection() as connection:
+        existing = connection.execute(
+            "SELECT email, credits FROM customer_accounts WHERE email = ?",
+            (normalized_email,),
+        ).fetchone()
+
+        if not existing:
+            raise ValueError("Customer account not found.")
+
+        new_credit_total = int(existing["credits"]) + int(credits_to_add)
+
+        connection.execute(
+            "UPDATE customer_accounts SET credits = ? WHERE email = ?",
+            (new_credit_total, normalized_email),
+        )
+        connection.commit()
+
+    return {
+        "email": normalized_email,
+        "credits": new_credit_total,
+    }
+
 
 init_customer_account_store()
 # Directories (env override allowed)
