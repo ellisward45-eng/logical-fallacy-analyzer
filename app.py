@@ -501,6 +501,12 @@ def analyze():
     from ai_reasoning_engine import analyze_fallacy_json
     import re
 
+    if not session.get(CUSTOMER_SESSION_KEY):
+        return jsonify({
+            "fallacies": [],
+            "message": "Please log in to use the analyzer."
+        }), 401
+
     data = request.get_json(silent=True) or {}
     text = (data.get("text") or "").strip()
 
