@@ -519,25 +519,6 @@ def customer_account():
         credits=account.get("credits", 0),
     )
 
-@app.route("/test-add-credits")
-def test_add_credits():
-    customer_email = session.get(CUSTOMER_SESSION_KEY)
-
-    if not customer_email:
-        return redirect(url_for("customer_login"))
-
-    updated_account = add_customer_credits(customer_email, 5)
-
-    return render_template_string(
-        """
-        <h2>Test Credits Added</h2>
-        <p><strong>Email:</strong> {{ email }}</p>
-        <p><strong>Credits:</strong> {{ credits }}</p>
-        <p><a href="/account">Go to My Account</a></p>
-        """,
-        email=updated_account["email"],
-        credits=updated_account["credits"],
-    )
 
 # --------------------------------------------------------------------
 # ðŸ§  FALLACY DETECTION (kept as-is; thresholds can be env-configured later)
