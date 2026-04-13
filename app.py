@@ -603,10 +603,17 @@ def analyze():
                     "explanation": (f.get("explanation") or "").strip()
                 })
 
-    if not formatted:
-        return jsonify({"fallacies": [], "message": "No logical fallacies detected."})
+   customer_email = session.get(CUSTOMER_SESSION_KEY)
 
-    return jsonify({"fallacies": formatted})
+if not formatted:
+    return jsonify({"fallacies": [], "message": "No logical fallacies detected."})
+
+try:
+    deduct_customer_credit(customer_email)
+except ValueError as exc:
+    return jsonify({"fallacies": [], "message": str(exc)}), 400
+
+return jsonify({"fallacies": formatted})
 
  
     
