@@ -601,22 +601,41 @@ def analyze():
                 "message": "Maximum 35 words per sentence."
             }), 400
 
-    formatted = []
+  formatted = []
 
-    for sentence in sentences:
-        result = analyze_fallacy_json(sentence)
-        analysis = result.get("analysis", [])
+for sentence in sentences:
+    result = analyze_fallacy_json(sentence)
+    analysis = result.get("analysis", [])
 
-        for item in analysis:
-            fallacies = item.get("fallacies", [])
+    sentence_fallacies = []
+    explanation_parts = []
+    highest_confidence = 0
 
-            for f in fallacies:
-                formatted.append({
-                    "sentence": sentence,
-                    "label": f.get("name", "Unknown"),
-                    "percent": int(f.get("confidence", 0)),
-                    "explanation": (f.get("explanation") or "").strip()
-                })
+    for item in analysis:
+        fallacies = item.get("fallacies", [])
+
+        for f in fallacies:
+            label = f.get("name", "Unknown")
+            confidence = int(f.get("confidence", 0))
+            explanation = (f.get("explanation") or "").strip()
+
+            if label not in sentence_fallacies:
+                sentence_fallacies.append(label)
+
+            if explanation and explanation not in explanation_parts:
+                explanation_parts.append(explanation)
+
+            if confidence > highest_confidence:
+                highest_confidence = confidence
+
+    if sentence_fallacies:
+        formatted.append({
+            "sentence": sentence,
+            "fallacies": sentence_fallacies,
+            "confidence": highest_confidence,
+            "explanation": " ".join(explanation_parts).strip()
+        })
+
 
     try:
         deduct_customer_credit(customer_email)

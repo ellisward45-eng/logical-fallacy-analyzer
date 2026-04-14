@@ -298,45 +298,23 @@
     function normalizeResult(data, originalText) {
       let items = [];
 
-      if (Array.isArray(data.fallacies)) {
-        items = data.fallacies.map(function(item, index) {
-          const label = item.label || "Unknown";
-          const confidenceValue = Number(item.percent ?? item.confidence ?? 0);
+if (Array.isArray(data.fallacies)) {
+  items = data.fallacies.map(function(item, index) {
+    const rawFallacies = Array.isArray(item.fallacies)
+      ? item.fallacies
+      : [item.label || "Unknown"];
 
-          return {
-            number: index + 1,
-            sentence: item.sentence || "",
-            fallacies: [label],
-            confidence: Number.isFinite(confidenceValue) ? Math.round(confidenceValue) : 0,
-            explanation: item.explanation || ""
-          };
-        });
-      } else if (Array.isArray(data.sentences)) {
-        items = data.sentences.map(function(item, index) {
-          const rawFallacies = Array.isArray(item.fallacies) ? item.fallacies : [];
-          const fallacies = rawFallacies.map(function(fallacy) {
-            if (typeof fallacy === "string") {
-              return fallacy;
-            }
-            if (fallacy && (fallacy.name || fallacy.label)) {
-              return fallacy.name || fallacy.label;
-            }
-            return "Unknown";
-          });
+    const confidenceValue = Number(item.percent ?? item.confidence ?? 0);
 
-          const confidenceValue = Number(
-            item.confidence_percentage ?? item.confidence ?? item.score ?? item.percent ?? 0
-          );
-
-          return {
-            number: index + 1,
-            sentence: item.sentence || item.text || item.statement || "",
-            fallacies: fallacies,
-            confidence: Number.isFinite(confidenceValue) ? Math.round(confidenceValue) : 0,
-            explanation: item.explanation || item.reasoning || item.details || ""
-          };
-        });
-      }
+    return {
+      number: index + 1,
+      sentence: item.sentence || "",
+      fallacies: rawFallacies,
+      confidence: Number.isFinite(confidenceValue) ? Math.round(confidenceValue) : 0,
+      explanation: item.explanation || ""
+    };
+  });
+}
 
       const totalFallacies = items.reduce(function(total, item) {
         return total + item.fallacies.length;
