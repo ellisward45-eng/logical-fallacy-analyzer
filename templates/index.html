@@ -327,7 +327,7 @@ if (Array.isArray(data.fallacies)) {
         summaryText = data.overview;
       } else if (items.length > 0) {
         summaryText =
-          "Detected " + totalFallacies + " possible fallacy" + (totalFallacies === 1 ? "" : "ies") +
+         "Detected " + totalFallacies + " possible " + (totalFallacies === 1 ? "fallacy" : "fallacies") +
           " across " + items.length + " sentence" + (items.length === 1 ? "" : "s") + ".";
       } else {
         summaryText = "No sentence analysis was returned.";
