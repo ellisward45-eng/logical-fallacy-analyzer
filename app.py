@@ -558,11 +558,26 @@ def analyze():
     from ai_reasoning_engine import analyze_fallacy_json
     import re
 
-    if not session.get(CUSTOMER_SESSION_KEY):
+    customer_email = session.get(CUSTOMER_SESSION_KEY)
+    if not customer_email:
         return jsonify({
             "fallacies": [],
             "message": "Please log in to use the analyzer."
         }), 401
+
+    account = get_customer_by_email(customer_email)
+    if not account:
+        session.pop(CUSTOMER_SESSION_KEY, None)
+        return jsonify({
+            "fallacies": [],
+            "message": "Please log in to use the analyzer."
+        }), 401
+
+    if int(account.get("credits", 0)) <= 0:
+        return jsonify({
+            "fallacies": [],
+            "message": "You do not have enough credits."
+        }), 400
 
     data = request.get_json(silent=True) or {}
     text = (data.get("text") or "").strip()
@@ -603,17 +618,15 @@ def analyze():
                     "explanation": (f.get("explanation") or "").strip()
                 })
 
-   customer_email = session.get(CUSTOMER_SESSION_KEY)
+    try:
+        deduct_customer_credit(customer_email)
+    except ValueError as exc:
+        return jsonify({"fallacies": [], "message": str(exc)}), 400
 
-if not formatted:
-    return jsonify({"fallacies": [], "message": "No logical fallacies detected."})
+    if not formatted:
+        return jsonify({"fallacies": [], "message": "No logical fallacies detected."})
 
-try:
-    deduct_customer_credit(customer_email)
-except ValueError as exc:
-    return jsonify({"fallacies": [], "message": str(exc)}), 400
-
-return jsonify({"fallacies": formatted})
+    return jsonify({"fallacies": formatted})
 
  
     
