@@ -599,6 +599,52 @@ def create_checkout_session():
 
     return jsonify({"checkout_url": checkout_session.url})
 
+@app.route("/create-checkout-session", methods=["POST"])
+def create_checkout_session():
+    customer_email = session.get(CUSTOMER_SESSION_KEY)
+    if not customer_email:
+        return jsonify({"error": "Please log in first."}), 401
+
+    pack = (request.get_json(silent=True) or {}).get("pack", "").strip()
+
+    if pack == "5":
+        price_id = STRIPE_PRICE_5
+        credits = 5
+    elif pack == "35":
+        price_id = STRIPE_PRICE_35
+        credits = 35
+    else:
+        return jsonify({"error": "Invalid credit pack selected."}), 400
+
+    if not stripe.api_key:
+        return jsonify({"error": "Stripe is not configured."}), 500
+
+    if not price_id:
+        return jsonify({"error": "Stripe price is not configured."}), 500
+
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            mode="payment",
+            line_items=[
+                {
+                    "price": price_id,
+                    "quantity": 1,
+                }
+            ],
+            success_url=request.host_url.rstrip("/") + "/account?checkout=success",
+            cancel_url=request.host_url.rstrip("/") + "/account?checkout=cancel",
+            client_reference_id=customer_email,
+            metadata={
+                "customer_email": customer_email,
+                "credits": str(credits),
+                "pack": pack,
+            },
+        )
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
+
+    return jsonify({"checkout_url": checkout_session.url})
+
 # --------------------------------------------------------------------
 # ðŸ§  FALLACY DETECTION (kept as-is; thresholds can be env-configured later)
 # --------------------------------------------------------------------
