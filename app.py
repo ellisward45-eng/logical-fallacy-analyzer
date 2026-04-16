@@ -601,6 +601,49 @@ def create_checkout_session():
 
     return jsonify({"checkout_url": checkout_session.url})
 
+@app.route("/stripe-webhook", methods=["POST"])
+def stripe_webhook():
+    payload = request.get_data(as_text=False)
+    sig_header = request.headers.get("Stripe-Signature", "")
+
+    webhook_secret = _env("STRIPE_WEBHOOK_SECRET", "") or ""
+    if not webhook_secret:
+        return "Stripe webhook secret is not configured.", 500
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload=payload,
+            sig_header=sig_header,
+            secret=webhook_secret,
+        )
+    except ValueError:
+        return "Invalid payload", 400
+    except stripe.error.SignatureVerificationError:
+        return "Invalid signature", 400
+
+    if event.get("type") == "checkout.session.completed":
+        session_data = event["data"]["object"]
+        customer_email = (
+            (session_data.get("metadata") or {}).get("customer_email")
+            or session_data.get("client_reference_id")
+            or ""
+        ).strip().lower()
+
+        credits_value = (session_data.get("metadata") or {}).get("credits", "0")
+
+        try:
+            credits_to_add = int(credits_value)
+        except (TypeError, ValueError):
+            credits_to_add = 0
+
+        if customer_email and credits_to_add > 0:
+            try:
+                add_customer_credits(customer_email, credits_to_add)
+            except ValueError:
+                pass
+
+    return "", 200
+
 # --------------------------------------------------------------------
 # ðŸ§  FALLACY DETECTION (kept as-is; thresholds can be env-configured later)
 # --------------------------------------------------------------------
