@@ -75,6 +75,10 @@ else:
 
 ADMIN_SESSION_KEY = "logged_in"
 CUSTOMER_SESSION_KEY = "customer_email"
+stripe.api_key = _env("STRIPE_SECRET_KEY", "")
+
+STRIPE_PRICE_5 = _env("STRIPE_PRICE_5", "") or ""
+STRIPE_PRICE_35 = _env("STRIPE_PRICE_35", "") or ""
 CUSTOMER_DB_PATH = Path(
     _env(
         "CUSTOMER_DB_PATH",
