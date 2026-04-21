@@ -547,13 +547,37 @@ def customer_account():
         <h2>My Account</h2>
         <p><strong>Email:</strong> {{ email }}</p>
         <p><strong>Credits:</strong> {{ credits }}</p>
+
+        <h3>Buy Credits</h3>
+        <button onclick="buyCredits('5')">Buy 5 credits for $1</button>
+        <button onclick="buyCredits('35')">Buy 35 credits for $5</button>
+
         <p><a href="/logout">Logout</a></p>
+
+        <script>
+        async function buyCredits(pack) {
+            const response = await fetch("/create-checkout-session", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ pack: pack })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                alert(data.error || "Unable to start checkout.");
+                return;
+            }
+
+            window.location.href = data.checkout_url;
+        }
+        </script>
         """,
         email=account["email"],
         credits=account.get("credits", 0),
     )
-
-
 
 @app.route("/create-checkout-session", methods=["POST"])
 def create_checkout_session():
