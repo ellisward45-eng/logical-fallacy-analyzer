@@ -645,15 +645,17 @@ def stripe_webhook():
     except stripe.error.SignatureVerificationError:
         return "Invalid signature", 400
 
-    if event.get("type") == "checkout.session.completed":
+    if event["type"] == "checkout.session.completed":
         session_data = event["data"]["object"]
+        metadata = session_data["metadata"] if "metadata" in session_data else {}
+
         customer_email = (
-            (session_data.get("metadata") or {}).get("customer_email")
-            or session_data.get("client_reference_id")
+            metadata.get("customer_email")
+            or (session_data["client_reference_id"] if "client_reference_id" in session_data else "")
             or ""
         ).strip().lower()
 
-        credits_value = (session_data.get("metadata") or {}).get("credits", "0")
+        credits_value = metadata.get("credits", "0")
 
         try:
             credits_to_add = int(credits_value)
