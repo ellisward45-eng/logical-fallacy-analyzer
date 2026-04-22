@@ -555,6 +555,13 @@ def customer_account():
     return render_template_string(
         """
         <h2>My Account</h2>
+
+        {% if checkout_status == "success" %}
+        <p><strong>Payment successful. Credits were added to your account.</strong></p>
+        {% elif checkout_status == "cancel" %}
+        <p><strong>Checkout was canceled.</strong></p>
+        {% endif %}
+
         <p><strong>Email:</strong> {{ email }}</p>
         <p><strong>Credits:</strong> {{ credits }}</p>
 
@@ -563,7 +570,7 @@ def customer_account():
         <button onclick="buyCredits('35')">Buy 35 credits for $5</button>
 
         <p><a href="/">Back to analyzer</a></p>
-<p><a href="/logout">Logout</a></p>
+        <p><a href="/logout">Logout</a></p>
 
         <script>
         async function buyCredits(pack) {
@@ -588,6 +595,7 @@ def customer_account():
         """,
         email=account["email"],
         credits=account.get("credits", 0),
+        checkout_status=request.args.get("checkout", "").strip().lower(),
     )
 
 @app.route("/create-checkout-session", methods=["POST"])
