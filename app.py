@@ -552,7 +552,8 @@ def customer_account():
         <button onclick="buyCredits('5')">Buy 5 credits for $1</button>
         <button onclick="buyCredits('35')">Buy 35 credits for $5</button>
 
-        <p><a href="/logout">Logout</a></p>
+        <p><a href="/">Back to analyzer</a></p>
+<p><a href="/logout">Logout</a></p>
 
         <script>
         async function buyCredits(pack) {
