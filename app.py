@@ -106,6 +106,16 @@ def init_customer_account_store() -> None:
             )
             """
         )
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS processed_stripe_sessions (
+                session_id TEXT PRIMARY KEY,
+                customer_email TEXT NOT NULL,
+                credits_added INTEGER NOT NULL,
+                processed_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+        )
         connection.commit()
 
 
@@ -663,16 +673,33 @@ def stripe_webhook():
         else:
             credits_value = "0"
 
+        session_id = str(session_data["id"]).strip() if "id" in session_data and session_data["id"] else ""
+
         try:
             credits_to_add = int(credits_value)
         except (TypeError, ValueError):
             credits_to_add = 0
 
-        if customer_email and credits_to_add > 0:
-            try:
-                add_customer_credits(customer_email, credits_to_add)
-            except ValueError:
-                pass
+        if customer_email and credits_to_add > 0 and session_id:
+            with get_customer_db_connection() as connection:
+                existing = connection.execute(
+                    "SELECT session_id FROM processed_stripe_sessions WHERE session_id = ?",
+                    (session_id,),
+                ).fetchone()
+
+                if not existing:
+                    add_customer_credits(customer_email, credits_to_add)
+                    connection.execute(
+                        """
+                        INSERT INTO processed_stripe_sessions (
+                            session_id,
+                            customer_email,
+                            credits_added
+                        ) VALUES (?, ?, ?)
+                        """,
+                        (session_id, customer_email, credits_to_add),
+                    )
+                    connection.commit()
 
     return "", 200
 
