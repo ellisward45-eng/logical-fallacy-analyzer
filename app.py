@@ -648,21 +648,19 @@ def stripe_webhook():
     if event["type"] == "checkout.session.completed":
         session_data = event["data"]["object"]
 
-        metadata = {}
-        if "metadata" in session_data and session_data["metadata"]:
-            metadata = dict(session_data["metadata"])
+        metadata = session_data["metadata"] if "metadata" in session_data else None
 
-        customer_email = (
-            metadata["customer_email"]
-            if "customer_email" in metadata and metadata["customer_email"]
-            else (
-                session_data["client_reference_id"]
-                if "client_reference_id" in session_data and session_data["client_reference_id"]
-                else ""
-            )
-        ).strip().lower()
+        if metadata and "customer_email" in metadata:
+            customer_email = str(metadata["customer_email"]).strip().lower()
+        elif "client_reference_id" in session_data and session_data["client_reference_id"]:
+            customer_email = str(session_data["client_reference_id"]).strip().lower()
+        else:
+            customer_email = ""
 
-        credits_value = metadata["credits"] if "credits" in metadata else "0"
+        if metadata and "credits" in metadata:
+            credits_value = metadata["credits"]
+        else:
+            credits_value = "0"
 
         try:
             credits_to_add = int(credits_value)
