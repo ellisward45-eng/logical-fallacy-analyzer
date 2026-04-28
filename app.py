@@ -527,12 +527,99 @@ def customer_login():
         return redirect(url_for("home"))
 
     return """
-    <h2>Customer Login</h2>
-    <form method="post">
-      Email:<br><input type="email" name="email"><br>
-      Password:<br><input type="password" name="password"><br><br>
-      <button type="submit">Login</button>
-    </form>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Login - Spot the Lie?</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                max-width: 720px;
+                margin: auto;
+                padding: 20px;
+                background: #f5f5f5;
+                color: #222;
+            }
+
+            .login-card {
+                background: white;
+                border-radius: 10px;
+                padding: 24px;
+                box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+                border: 1px solid #e5e5e5;
+                max-width: 460px;
+                margin: 40px auto;
+            }
+
+            h2 {
+                margin-top: 0;
+                margin-bottom: 20px;
+                text-align: center;
+            }
+
+            label {
+                display: block;
+                font-weight: bold;
+                margin-bottom: 6px;
+            }
+
+            input {
+                width: 100%;
+                padding: 12px;
+                margin-bottom: 16px;
+                border: 1px solid #ccc;
+                border-radius: 8px;
+                box-sizing: border-box;
+                font-size: 15px;
+            }
+
+            button,
+            .link-button {
+                padding: 12px 16px;
+                border: none;
+                background: #222;
+                color: white;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 15px;
+                text-decoration: none;
+                display: inline-block;
+            }
+
+            button:hover,
+            .link-button:hover {
+                background: #444;
+            }
+
+            .button-row {
+                display: flex;
+                gap: 12px;
+                flex-wrap: wrap;
+                margin-top: 8px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="login-card">
+            <h2>Customer Login</h2>
+            <form method="post">
+                <label for="email">Email</label>
+                <input id="email" type="email" name="email" required>
+
+                <label for="password">Password</label>
+                <input id="password" type="password" name="password" required>
+
+                <div class="button-row">
+                    <button type="submit">Login</button>
+                    <a class="link-button" href="/signup">Create account</a>
+                    <a class="link-button" href="/">Back to analyzer</a>
+                </div>
+            </form>
+        </div>
+    </body>
+    </html>
     """
 
 @app.route("/logout")
