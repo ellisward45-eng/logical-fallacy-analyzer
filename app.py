@@ -554,44 +554,141 @@ def customer_account():
 
     return render_template_string(
         """
-        <h2>My Account</h2>
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>My Account - Spot the Lie?</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    max-width: 720px;
+                    margin: auto;
+                    padding: 20px;
+                    background: #f5f5f5;
+                    color: #222;
+                }
 
-        {% if checkout_status == "success" %}
-        <p><strong>Payment successful. Credits were added to your account.</strong></p>
-        {% elif checkout_status == "cancel" %}
-        <p><strong>Checkout was canceled.</strong></p>
-        {% endif %}
+                .account-card {
+                    background: white;
+                    border-radius: 10px;
+                    padding: 24px;
+                    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+                    border: 1px solid #e5e5e5;
+                }
 
-        <p><strong>Email:</strong> {{ email }}</p>
-        <p><strong>Credits:</strong> {{ credits }}</p>
+                h1 {
+                    margin-top: 0;
+                    margin-bottom: 20px;
+                    text-align: center;
+                }
 
-        <h3>Buy Credits</h3>
-        <button onclick="buyCredits('5')">Buy 5 credits for $1</button>
-        <button onclick="buyCredits('35')">Buy 35 credits for $5</button>
+                .status-box {
+                    background: #f7f7f7;
+                    border: 1px solid #e5e5e5;
+                    border-radius: 8px;
+                    padding: 12px;
+                    margin-bottom: 18px;
+                    text-align: center;
+                    font-weight: bold;
+                }
 
-        <p><a href="/">Back to analyzer</a></p>
-        <p><a href="/logout">Logout</a></p>
+                .info-row {
+                    margin-bottom: 14px;
+                    font-size: 18px;
+                }
 
-        <script>
-        async function buyCredits(pack) {
-            const response = await fetch("/create-checkout-session", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ pack: pack })
-            });
+                .label {
+                    font-weight: bold;
+                }
 
-            const data = await response.json();
+                h3 {
+                    margin-top: 24px;
+                    margin-bottom: 14px;
+                }
 
-            if (!response.ok) {
-                alert(data.error || "Unable to start checkout.");
-                return;
+                .button-row {
+                    display: flex;
+                    gap: 12px;
+                    flex-wrap: wrap;
+                    margin-bottom: 20px;
+                }
+
+                button,
+                .link-button {
+                    padding: 12px 16px;
+                    border: none;
+                    background: #222;
+                    color: white;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-size: 15px;
+                    text-decoration: none;
+                    display: inline-block;
+                }
+
+                button:hover,
+                .link-button:hover {
+                    background: #444;
+                }
+
+                .secondary-links {
+                    display: flex;
+                    gap: 12px;
+                    flex-wrap: wrap;
+                    margin-top: 10px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="account-card">
+                <h1>My Account</h1>
+
+                {% if checkout_status == "success" %}
+                <div class="status-box">Payment successful. Credits were added to your account.</div>
+                {% elif checkout_status == "cancel" %}
+                <div class="status-box">Checkout was canceled.</div>
+                {% endif %}
+
+                <div class="info-row"><span class="label">Email:</span> {{ email }}</div>
+                <div class="info-row"><span class="label">Credits:</span> {{ credits }}</div>
+
+                <h3>Buy Credits</h3>
+
+                <div class="button-row">
+                    <button onclick="buyCredits('5')">Buy 5 credits for $1</button>
+                    <button onclick="buyCredits('35')">Buy 35 credits for $5</button>
+                </div>
+
+                <div class="secondary-links">
+                    <a class="link-button" href="/">Back to analyzer</a>
+                    <a class="link-button" href="/logout">Logout</a>
+                </div>
+            </div>
+
+            <script>
+            async function buyCredits(pack) {
+                const response = await fetch("/create-checkout-session", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ pack: pack })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    alert(data.error || "Unable to start checkout.");
+                    return;
+                }
+
+                window.location.href = data.checkout_url;
             }
-
-            window.location.href = data.checkout_url;
-        }
-        </script>
+            </script>
+        </body>
+        </html>
         """,
         email=account["email"],
         credits=account.get("credits", 0),
