@@ -1,12 +1,472 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Logical Fallacy Detection</title>
+  <meta charset="UTF-8">
+  <title>Spot the Lie?</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/1828/1828843.png">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 720px;
+      margin: auto;
+      padding: 20px;
+     background: #60a5fa;
+      color: #222;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 8px;
+      color: #000000;
+    }
+
+    p {
+      text-align: center;
+    color: #ffffff;
+      margin-top: 0;
+      margin-bottom: 18px;
+    }
+    
+.tagline {
+  text-align: center;
+  margin: 40px 0;
+}
+
+a {
+  color: #ffffff;
+}
+
+    textarea {
+      width: 100%;
+      height: 140px;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      resize: vertical;
+    }
+
+    button {
+      padding: 10px 16px;
+      margin-top: 10px;
+      border: none;
+      background: #222;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    button:hover {
+      background: #444;
+    }
+
+    .notice {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .pricing-box {
+      margin-top: 16px;
+      margin-bottom: 20px;
+      background: white;
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e5e5e5;
+    }
+
+    .pricing-box h3 {
+      margin-top: 0;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .price-line {
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .pricing-text {
+      text-align: center;
+      color: #555;
+      line-height: 1.5;
+      margin-bottom: 0;
+    }
+
+    .example {
+      background: #e9e9e9;
+      padding: 8px;
+      margin: 6px 0;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .example:hover {
+      background: #dcdcdc;
+    }
+
+    .tools {
+      margin-top: 12px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    #result {
+      margin-top: 20px;
+    }
+
+    .result-card {
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 14px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    .result-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .summary-text {
+      line-height: 1.5;
+    }
+
+    .sentence-label {
+      font-size: 13px;
+      color: #777;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .sentence-text {
+      font-size: 16px;
+      font-weight: bold;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    .fallacy-list {
+      margin-bottom: 12px;
+    }
+
+    .fallacy-tag {
+      display: inline-block;
+      background: #eef2ff;
+      color: #2c3e94;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+      margin-right: 6px;
+      margin-bottom: 6px;
+    }
+
+    .confidence {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+
+    .explanation-box {
+      background: #fafafa;
+      border: 1px solid #e5e5e5;
+      border-radius: 6px;
+      padding: 12px;
+    }
+
+    .explanation-title {
+      font-size: 13px;
+      color: #666;
+      font-weight: bold;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .empty-box,
+    .loading-box,
+    .error-box {
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 20px;
+    }
+
+    .loading-box {
+      border-left: 4px solid #2563eb;
+    }
+
+    .error-box {
+      border-left: 4px solid #dc2626;
+      color: #991b1b;
+    }
+.footer-links {
+  margin-top: 30px;
+  font-size: 14px;
+  color: #ffffff;
+  text-align: center;
+}
+
+    .footer-links a {
+      color: inherit;
+      text-decoration: none;
+    }
+  </style>
 </head>
 <body>
-    <h1>Welcome to Logical Fallacy Detection</h1>
-    <p>This app analyzes text for logical fallacies.</p>
-<p>Use the text box below or POST to <code>/analyze</code>.</p>
-<p><em>Audio/video analysis is coming soon.</em></p>
+  <h1>Spot the Lie?</h1>
+
+<div class="tagline">
+  <p>Analyze statements and uncover flawed reasoning.</p>
+  <p>We analyze the most commonly used logical fallacies.</p>
+</div>
+
+  <textarea id="inputText" placeholder="Paste a message or statement..."></textarea>
+
+  <button onclick="runAnalysis()">Analyze</button>
+
+<div class="tools">
+  <button onclick="window.location.href='/signup'">Create account</button>
+  <button onclick="window.location.href='/login'">Login</button>
+  <button onclick="window.location.href='/account'">My account</button>
+</div>
+
+<div class="notice">
+<p style="color: #ffffff;">
+Buy credits when you need them. 1 credit per analyze. Maximum 10 sentences per analyze. Maximum 35 words per sentence. Submitted text is not stored as part of the current analysis flow.
+</p>
+ 
+</div>
+  <div class="pricing-box">
+    <h3>Credit Packs</h3>
+    <div class="price-line">5 credits for $1</div>
+    <p class="pricing-text">
+      Or get 35 credits for $5. 1 credit per analyze. Maximum 10 sentences per analyze.
+      Maximum 35 words per sentence. Use credits anytime. Buy more when you run out.
+      Higher tiers and upgraded models coming later.
+    </p>
+  </div>
+
+  <h3>Examples</h3>
+
+  <div class="example" onclick="insertExample(this)">
+    You're either with us or against us.
+  </div>
+
+  <div class="example" onclick="insertExample(this)">
+    Everyone agrees, so it must be true.
+  </div>
+
+  <div class="example" onclick="insertExample(this)">
+    If we allow this, society will collapse.
+  </div>
+
+  <div class="example" onclick="insertExample(this)">
+    Only an idiot would disagree.
+  </div>
+
+  <div id="result">
+    <div class="empty-box">Your analysis result will appear here.</div>
+  </div>
+
+  <div class="tools">
+    <button onclick="copyResult()">Copy result</button>
+    <button onclick="copyLink()">Copy link</button>
+  </div>
+
+  <div class="footer-links">
+    <a href="/terms">Terms</a> |
+    <a href="/privacy">Privacy</a> |
+    <a href="/disclaimer">Disclaimer</a>
+  </div>
+
+  <script>
+    let latestPlainTextResult = "";
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function titleCase(value) {
+      return String(value || "")
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, function(char) {
+          return char.toUpperCase();
+        });
+    }
+
+    function normalizeResult(data, originalText) {
+      let items = [];
+
+if (Array.isArray(data.fallacies)) {
+  items = data.fallacies.map(function(item, index) {
+    const rawFallacies = Array.isArray(item.fallacies)
+      ? item.fallacies
+      : [item.label || "Unknown"];
+
+    const confidenceValue = Number(item.percent ?? item.confidence ?? 0);
+
+    return {
+      number: index + 1,
+      sentence: item.sentence || "",
+      fallacies: rawFallacies,
+      confidence: Number.isFinite(confidenceValue) ? Math.round(confidenceValue) : 0,
+      explanation: item.explanation || ""
+    };
+  });
+}
+
+      const totalFallacies = items.reduce(function(total, item) {
+        return total + item.fallacies.length;
+      }, 0);
+
+      let summaryText = "";
+      if (data.summary) {
+        summaryText = data.summary;
+      } else if (data.overview) {
+        summaryText = data.overview;
+      } else if (items.length > 0) {
+        summaryText =
+         "Detected " + totalFallacies + " possible " + (totalFallacies === 1 ? "fallacy" : "fallacies") +
+          " across " + items.length + " sentence" + (items.length === 1 ? "" : "s") + ".";
+      } else {
+        summaryText = "No sentence analysis was returned.";
+      }
+
+      return {
+        input: data.original_text || data.input || originalText,
+        summary: summaryText,
+        items: items
+      };
+    }
+
+    function buildPlainText(result) {
+      const lines = [];
+      lines.push("Spot the Lie? Analysis");
+      lines.push("");
+      lines.push("Summary: " + result.summary);
+      lines.push("");
+
+      result.items.forEach(function(item) {
+        lines.push("Sentence " + item.number + ": " + item.sentence);
+        lines.push("Fallacies: " + (item.fallacies.length ? item.fallacies.join(", ") : "None detected"));
+        lines.push("Confidence: " + item.confidence + "%");
+        lines.push("Explanation: " + (item.explanation || "No explanation provided."));
+        lines.push("");
+      });
+
+      return lines.join("\n").trim();
+    }
+
+    function renderResult(data, originalText) {
+      const result = normalizeResult(data, originalText);
+      latestPlainTextResult = buildPlainText(result);
+
+      let html = "";
+
+      html += '<div class="result-card">';
+      html += '<div class="result-title">Summary</div>';
+      html += '<div class="summary-text">' + escapeHtml(result.summary) + '</div>';
+      html += '</div>';
+
+      if (result.items.length === 0) {
+        html += '<div class="result-card">No sentence-level analysis was returned.</div>';
+      } else {
+        result.items.forEach(function(item) {
+          html += '<div class="result-card">';
+          html += '<div class="sentence-label">Sentence ' + item.number + '</div>';
+          html += '<div class="sentence-text">' + escapeHtml(item.sentence) + '</div>';
+
+          html += '<div class="fallacy-list">';
+          if (item.fallacies.length > 0) {
+            item.fallacies.forEach(function(fallacy) {
+              html += '<span class="fallacy-tag">' + escapeHtml(titleCase(fallacy)) + '</span>';
+            });
+          } else {
+            html += '<span class="fallacy-tag">No fallacy detected</span>';
+          }
+          html += '</div>';
+
+          html += '<div class="confidence">Confidence: ' + item.confidence + '%</div>';
+
+          html += '<div class="explanation-box">';
+          html += '<div class="explanation-title">Explanation</div>';
+          html += '<div>' + escapeHtml(item.explanation || "No explanation provided.") + '</div>';
+          html += '</div>';
+
+          html += '</div>';
+        });
+      }
+
+      document.getElementById("result").innerHTML = html;
+    }
+
+    async function runAnalysis() {
+      const text = document.getElementById("inputText").value.trim();
+
+      if (!text) {
+        alert("Please enter text.");
+        return;
+      }
+
+      document.getElementById("result").innerHTML =
+        '<div class="loading-box">Analyzing...</div>';
+
+      try {
+        const response = await fetch("/analyze", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ text: text })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          const message = data && (data.error || data.message) ? (data.error || data.message) : "Analysis failed.";
+          document.getElementById("result").innerHTML =
+            '<div class="error-box">' + escapeHtml(message) + '</div>';
+          latestPlainTextResult = "";
+          return;
+        }
+
+        renderResult(data, text);
+      } catch (error) {
+        document.getElementById("result").innerHTML =
+          '<div class="error-box">Something went wrong while analyzing the text.</div>';
+        latestPlainTextResult = "";
+      }
+    }
+
+    function insertExample(el) {
+      document.getElementById("inputText").value = el.innerText.trim();
+    }
+
+    function copyResult() {
+      const text = latestPlainTextResult || "No result available yet.";
+      navigator.clipboard.writeText(text);
+      alert("Result copied");
+    }
+
+    function copyLink() {
+      navigator.clipboard.writeText(window.location.href);
+      alert("Link copied");
+    }
+  </script>
 </body>
 </html>
