@@ -21,6 +21,7 @@ from huggingface_hub import login
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 from waitress import serve
+from itsdangerous import URLSafeTimedSerializer
 # ------------------------------------------------------------
 # âœ… Local .env support (safe no-op in production)
 # ------------------------------------------------------------
