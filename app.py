@@ -1077,6 +1077,34 @@ def forgot_password():
         </form>
     '''
 
+@app.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    try:
+        email = serializer.loads(token, salt=SECURITY_PASSWORD_SALT, max_age=3600)
+    except:
+        return "Invalid or expired link"
+
+    if request.method == 'POST':
+        new_password = request.form.get('password')
+
+        conn = sqlite3.connect('database.db')
+        cur = conn.cursor()
+
+        hashed = generate_password_hash(new_password)
+
+        cur.execute("UPDATE users SET password = ? WHERE email = ?", (hashed, email))
+        conn.commit()
+        conn.close()
+
+        return redirect('/login')
+
+    return '''
+        <form method="POST">
+            <input name="password" type="password" placeholder="New password" required>
+            <button type="submit">Set New Password</button>
+        </form>
+    '''
+
 
 if __name__ == "__main__":
     host = _env("HOST", "0.0.0.0") or "0.0.0.0"
