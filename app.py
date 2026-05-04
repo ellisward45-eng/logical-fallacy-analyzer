@@ -1042,6 +1042,41 @@ def privacy():
 def disclaimer():
     return render_template("disclaimer.html")
 
+@app.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form.get('email')
+
+        # find user (adjust if your DB is different)
+        conn = sqlite3.connect('database.db')
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM users WHERE email = ?", (email,))
+        user = cur.fetchone()
+        conn.close()
+
+        if user:
+            token = serializer.dumps(email, salt=SECURITY_PASSWORD_SALT)
+
+            reset_link = url_for('reset_password', token=token, _external=True)
+
+            msg = MIMEText(f"Reset your password:\n{reset_link}")
+            msg['Subject'] = "Password Reset"
+            msg['From'] = "your-email@gmail.com"
+            msg['To'] = email
+
+            with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+                server.login("your-email@gmail.com", "your-app-password")
+                server.send_message(msg)
+
+        return "If email exists, reset link sent."
+
+    return '''
+        <form method="POST">
+            <input name="email" type="email" placeholder="Enter your email" required>
+            <button type="submit">Reset Password</button>
+        </form>
+    '''
+
 
 if __name__ == "__main__":
     host = _env("HOST", "0.0.0.0") or "0.0.0.0"
