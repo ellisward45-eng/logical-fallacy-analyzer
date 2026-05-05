@@ -1065,7 +1065,7 @@ def forgot_password():
             msg['To'] = email
 
             with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
-                server.login("your-email@gmail.com", "your-app-password")
+                server.login("fallacy01.logicalapp@gmail.com", "BetterMinds")
                 server.send_message(msg)
 
         return "If email exists, reset link sent."
