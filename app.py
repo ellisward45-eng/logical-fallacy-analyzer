@@ -25,6 +25,23 @@ from itsdangerous import URLSafeTimedSerializer
 # ------------------------------------------------------------
 # âœ… Local .env support (safe no-op in production)
 # ------------------------------------------------------------
+def init_db():
+    conn = sqlite3.connect('database.db')
+    cur = conn.cursor()
+
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS customer_accounts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT UNIQUE,
+        password_hash TEXT,
+        credits INTEGER DEFAULT 0
+    )
+    """)
+
+    conn.commit()
+    conn.close()
+
+
 def _load_dotenv_if_present() -> None:
     try:
         from dotenv import load_dotenv  # type: ignore
@@ -1104,6 +1121,8 @@ def reset_password(token):
             <button type="submit">Set New Password</button>
         </form>
     '''
+
+init_db()
 
 
 if __name__ == "__main__":
