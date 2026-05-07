@@ -1050,7 +1050,7 @@ def forgot_password():
         # find user (adjust if your DB is different)
         conn = sqlite3.connect('database.db')
         cur = conn.cursor()
-        cur.execute("SELECT * FROM users WHERE email = ?", (email,))
+        cur.execute("SELECT * FROM customer_accounts WHERE email = ?", (email,))
         user = cur.fetchone()
         conn.close()
 
