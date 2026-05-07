@@ -1071,7 +1071,7 @@ def forgot_password():
         user = cur.fetchone()
         conn.close()
 
-        if user:
+        if True:
             token = serializer.dumps(email, salt=SECURITY_PASSWORD_SALT)
 
             reset_link = url_for('reset_password', token=token, _external=True)
