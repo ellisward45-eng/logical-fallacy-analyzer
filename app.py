@@ -91,6 +91,11 @@ if _is_production():
 else:
     app.secret_key = _env("APP_SECRET_KEY", "dev-only-insecure-fallback") or "dev-only-insecure-fallback"
 
+
+SECURITY_PASSWORD_SALT = "password-reset-salt"
+serializer = URLSafeTimedSerializer(app.secret_key)
+
+
 ADMIN_SESSION_KEY = "logged_in"
 CUSTOMER_SESSION_KEY = "customer_email"
 stripe.api_key = _env("STRIPE_SECRET_KEY", "")
