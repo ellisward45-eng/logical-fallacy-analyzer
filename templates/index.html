@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Spot the Lie?</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/1828/1828843.png">
 
   <style>
@@ -213,11 +213,33 @@ a {
   text-align: center;
 }
 
-    .footer-links a {
-      color: inherit;
-      text-decoration: none;
-    }
-  </style>
+  .footer-links a {
+  color: inherit;
+  text-decoration: none;
+}
+
+@media (max-width: 600px) {
+  body {
+    padding: 10px;
+  }
+
+  textarea {
+    width: 100%;
+  }
+
+  .button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .button-group button {
+    width: 100%;
+    font-size: 16px;
+  }
+}
+
+</style>
 </head>
 <body>
   <h1>Spot the Lie?</h1>
@@ -230,7 +252,7 @@ a {
 
   <button onclick="runAnalysis()">Analyze</button>
 
-<div class="tools">
+<div class="tools button-group">
   <button onclick="window.location.href='/signup'">Create account</button>
   <button onclick="window.location.href='/login'">Login</button>
   <button onclick="window.location.href='/account'">My account</button>
