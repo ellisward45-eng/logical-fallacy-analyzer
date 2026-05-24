@@ -4,6 +4,7 @@ import os
 import smtplib
 import uuid
 import sqlite3
+import resend
 from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -99,6 +100,7 @@ serializer = URLSafeTimedSerializer(app.secret_key)
 ADMIN_SESSION_KEY = "logged_in"
 CUSTOMER_SESSION_KEY = "customer_email"
 stripe.api_key = _env("STRIPE_SECRET_KEY", "")
+resend.api_key = "re_NH9L88aG_GqN5yHEtHAXRDrS9hBqRfEP9"
 
 STRIPE_PRICE_5 = _env("STRIPE_PRICE_5", "") or ""
 STRIPE_PRICE_35 = _env("STRIPE_PRICE_35", "") or ""
@@ -1076,26 +1078,22 @@ def forgot_password():
         user = cur.fetchone()
         conn.close()
 
-        if True:
-            token = serializer.dumps(email, salt=SECURITY_PASSWORD_SALT)
+        if True:  
+                token = serializer.dumps(email, salt=SECURITY_PASSWORD_SALT)
+                reset_link = url_for('reset_password', token=token, _external=True)
 
-            reset_link = url_for('reset_password', token=token, _external=True)
-
-            msg = MIMEText(f"Reset your password:\n{reset_link}")
-            msg['Subject'] = "Password Reset"
-            msg['From'] = "your-email@gmail.com"
-            msg['To'] = email
-
-            with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
-                server.login("fallacy01.logicalapp@gmail.com", "BetterMinds")
-                server.send_message(msg)
+                resend.Emails.send({
+                "from": "SpotTheLie <no-reply@spotthelieapp.com>",
+                "to": email,
+               "html": f"<h1>Password Reset</h1><p><b>Click this link:</b></p><p>{reset_link}</p>"
+            })
 
         return "If email exists, reset link sent."
 
     return '''
         <form method="POST">
-            <input name="email" type="email" placeholder="Enter your email" required>
-            <button type="submit">Reset Password</button>
+           <input name="email" type="email" placeholder="Enter your email" required style="font-size:18px;padding:10px;width:300px;">
+           <button type="submit" style="font-size:18px;padding:10px 20px;">Reset Password</button> 
         </form>
     '''
 
