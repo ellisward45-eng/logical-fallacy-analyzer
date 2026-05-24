@@ -1083,10 +1083,11 @@ def forgot_password():
                 reset_link = url_for('reset_password', token=token, _external=True)
 
                 resend.Emails.send({
-                "from": "SpotTheLie <no-reply@spotthelieapp.com>",
-                "to": email,
-               "html": f"<h1>Password Reset</h1><p><b>Click this link:</b></p><p>{reset_link}</p>"
-            })
+    "from": "onboarding@resend.dev",
+    "to": email,
+    "subject": "Password Reset",
+    "html": f"<p>Click the link below to reset your password:</p><p><a href='{reset_link}'>Reset Password</a></p>"
+})
 
         return "If email exists, reset link sent."
 
