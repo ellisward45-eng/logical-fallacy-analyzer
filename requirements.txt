@@ -19,3 +19,4 @@ huggingface-hub==0.35.3
 openai>=1.0.0
 waitress==3.0.2
 stripe>=15.0.0
+resend
