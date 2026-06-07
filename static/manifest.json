@@ -1,0 +1,17 @@
+{
+  "name": "Spot the Lie?",
+  "short_name": "Spot the Lie",
+  "description": "Detect the most commonly used logical fallacies",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#60a5fa",
+  "theme_color": "#60a5fa",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/static/spot-the-lie-logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
