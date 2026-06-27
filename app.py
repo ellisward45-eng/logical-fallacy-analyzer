@@ -171,7 +171,7 @@ def create_customer_account(email: str, password: str) -> dict:
         account = {
             "email": normalized_email,
             "password_hash": generate_password_hash(password),
-            "credits": 0,
+            "credits": 5,
         }
 
         connection.execute(
@@ -528,6 +528,7 @@ def customer_signup():
 
     return """
     <h2>Create Account</h2>
+<p>Create your account and get 5 free credits to try Spot the Lie?</p>
     <form method="post">
       Email:<br><input type="email" name="email"><br>
       Password:<br><input type="password" name="password"><br><br>
