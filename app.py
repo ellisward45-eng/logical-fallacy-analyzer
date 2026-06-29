@@ -774,10 +774,14 @@ def customer_account():
                     <button onclick="buyCredits('35')">Buy 35 credits for $5</button>
                 </div>
 
-                <div class="secondary-links">
-                    <a class="link-button" href="/">Back to analyzer</a>
-                    <a class="link-button" href="/logout">Logout</a>
-                </div>
+               <div class="secondary-links">
+    <a class="link-button" href="/">Back to analyzer</a>
+    <a class="link-button" href="/logout">Logout</a>
+
+    <form action="/delete-account" method="post" onsubmit="return confirm('Are you sure? This will permanently delete your account and any remaining credits.');">
+       <button type="submit" class="link-button">Delete My Account</button>
+    </form>
+</div>
             </div>
 
             <script>
@@ -807,6 +811,53 @@ def customer_account():
         credits=account.get("credits", 0),
         checkout_status=request.args.get("checkout", "").strip().lower(),
     )
+
+@app.route("/delete-account", methods=["GET", "POST"])
+def delete_customer_account():
+    customer_email = session.get(CUSTOMER_SESSION_KEY)
+
+    if request.method == "GET":
+        return render_template_string(
+            """
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <title>Delete Account - Spot the Lie?</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            </head>
+            <body>
+                <h1>Delete Account</h1>
+                <p>
+                    You can delete your Spot the Lie account from the My Account page.
+                    Deleting your account permanently removes your account, login access,
+                    and remaining credits.
+                </p>
+                <p>
+                    To delete your account, log in, go to My Account, and click
+                    Delete My Account.
+                </p>
+                <p><a href="/account">Go to My Account</a></p>
+                <p><a href="/">Back to analyzer</a></p>
+            </body>
+            </html>
+            """
+        )
+
+    if not customer_email:
+        return redirect(url_for("customer_login"))
+
+    normalized_email = customer_email.strip().lower()
+
+    with get_customer_db_connection() as connection:
+        connection.execute(
+            "DELETE FROM customer_accounts WHERE email = ?",
+            (normalized_email,),
+        )
+        connection.commit()
+
+    session.pop(CUSTOMER_SESSION_KEY, None)
+    return redirect(url_for("home"))
 
 @app.route("/create-checkout-session", methods=["POST"])
 def create_checkout_session():
