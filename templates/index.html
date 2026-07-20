@@ -102,6 +102,11 @@ a {
       margin-bottom: 0;
     }
 
+
+        .play-app .web-purchase-only {
+      display: none !important;
+    }
+
     .example {
       background: #e9e9e9;
       padding: 8px;
@@ -247,7 +252,15 @@ a {
 </style>
 </head>
 <body>
-  <h1>Spot the Lie?</h1>
+
+<script>
+if (new URLSearchParams(window.location.search).get("source") === "play") {
+  document.documentElement.classList.add("play-app");
+}
+</script>
+
+
+<h1>Spot the Lie?</h1>
 
 <p>Analyze statements and uncover flawed reasoning.</p>
 <p>We analyze the most commonly used logical fallacies.</p>
@@ -262,22 +275,30 @@ a {
   <button onclick="window.location.href='/login'">Login</button>
   <button onclick="window.location.href='/account'">My account</button>
 </div>
+<!-- templates/index.html -->
 
-<div class="notice">
-<p style="color: #ffffff;">
-Buy credits when you need them. 1 credit per analyze. Maximum 10 sentences per analyze. Maximum 35 words per sentence. Submitted text is not stored as part of the current analysis flow.
-</p>
- 
-</div>
+<div id="web-credit-information" class="web-purchase-only">
+  <div class="notice">
+    <p style="color: #ffffff;">
+      Buy credits when you need them. 1 credit per analyze.
+      Maximum 10 sentences per analyze.
+      Maximum 35 words per sentence.
+      Submitted text is not stored as part of the current analysis flow.
+    </p>
+  </div>
+
   <div class="pricing-box">
     <h3>Credit Packs</h3>
     <div class="price-line">5 credits for $1</div>
     <p class="pricing-text">
-      Or get 35 credits for $5. 1 credit per analyze. Maximum 10 sentences per analyze.
-      Maximum 35 words per sentence. Use credits anytime. Buy more when you run out.
+      Or get 35 credits for $5. 1 credit per analyze.
+      Maximum 10 sentences per analyze.
+      Maximum 35 words per sentence.
+      Use credits anytime. Buy more when you run out.
       Higher tiers and upgraded models coming later.
     </p>
   </div>
+</div>
 
   <h3>Examples</h3>
 

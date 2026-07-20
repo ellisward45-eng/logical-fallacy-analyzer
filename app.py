@@ -751,11 +751,25 @@ def customer_account():
                     gap: 12px;
                     flex-wrap: wrap;
                     margin-top: 10px;
-                }
+
+             .play-app .web-purchase-only {
+                display: none !important;
+             }
+
+
+                        
             </style>
         </head>
         <body>
-            <div class="account-card">
+    <script>
+        if (new URLSearchParams(window.location.search).get("source") === "play"
+            || localStorage.getItem("spotTheLiePlatform") === "play") {
+            document.documentElement.classList.add("play-app");
+        }
+    </script>
+
+    <div class="account-card">
+         
                 <h1>My Account</h1>
 
                 {% if checkout_status == "success" %}
@@ -766,13 +780,15 @@ def customer_account():
 
                 <div class="info-row"><span class="label">Email:</span> {{ email }}</div>
                 <div class="info-row"><span class="label">Credits:</span> {{ credits }}</div>
-
+                <div class="web-purchase-only"> 
                 <h3>Buy Credits</h3>
 
                 <div class="button-row">
                     <button onclick="buyCredits('5')">Buy 5 credits for $1</button>
                     <button onclick="buyCredits('35')">Buy 35 credits for $5</button>
                 </div>
+
+            </div>
 
                <div class="secondary-links">
     <a class="link-button" href="/">Back to analyzer</a>
