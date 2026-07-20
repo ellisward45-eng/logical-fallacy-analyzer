@@ -751,7 +751,7 @@ def customer_account():
                     gap: 12px;
                     flex-wrap: wrap;
                     margin-top: 10px;
-
+                    }
              .play-app .web-purchase-only {
                 display: none !important;
              }

@@ -255,6 +255,10 @@ a {
 
 <script>
 if (new URLSearchParams(window.location.search).get("source") === "play") {
+  localStorage.setItem("spotTheLiePlatform", "play");
+}
+
+if (localStorage.getItem("spotTheLiePlatform") === "play") {
   document.documentElement.classList.add("play-app");
 }
 </script>
