@@ -762,11 +762,24 @@ def customer_account():
         </head>
         <body>
     <script>
-        if (new URLSearchParams(window.location.search).get("source") === "play"
-            || localStorage.getItem("spotTheLiePlatform") === "play") {
-            document.documentElement.classList.add("play-app");
-        }
-    </script>
+    const parameters = new URLSearchParams(window.location.search);
+    const launchedFromPlay = parameters.get("source") === "play";
+    const runningStandalone = window.matchMedia(
+        "(display-mode: standalone)"
+    ).matches;
+
+    localStorage.removeItem("spotTheLiePlatform");
+
+    if (launchedFromPlay) {
+        sessionStorage.setItem("spotTheLiePlatform", "play");
+    } else if (!runningStandalone) {
+        sessionStorage.removeItem("spotTheLiePlatform");
+    }
+
+    if (sessionStorage.getItem("spotTheLiePlatform") === "play") {
+        document.documentElement.classList.add("play-app");
+    }
+</script>
 
     <div class="account-card">
          
