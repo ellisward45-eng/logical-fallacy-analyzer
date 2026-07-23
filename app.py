@@ -100,7 +100,7 @@ serializer = URLSafeTimedSerializer(app.secret_key)
 ADMIN_SESSION_KEY = "logged_in"
 CUSTOMER_SESSION_KEY = "customer_email"
 stripe.api_key = _env("STRIPE_SECRET_KEY", "")
-resend.api_key = "re_NH9L88aG_GqN5yHEtHAXRDrS9hBqRfEP9"
+resend.api_key = env("RESEND_API_KEY", "")
 
 STRIPE_PRICE_5 = _env("STRIPE_PRICE_5", "") or ""
 STRIPE_PRICE_35 = _env("STRIPE_PRICE_35", "") or ""
