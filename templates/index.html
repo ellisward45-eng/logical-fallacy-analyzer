@@ -254,23 +254,50 @@ a {
 <body>
 
 <script>
-    const parameters = new URLSearchParams(window.location.search);
-    const launchedFromPlay = parameters.get("source") === "play";
-    const runningStandalone = window.matchMedia(
-        "(display-mode: standalone)"
-    ).matches;
+    (() => {
+        const params = new URLSearchParams(window.location.search);
 
-    localStorage.removeItem("spotTheLiePlatform");
+        if (params.get("source") === "play") {
+            sessionStorage.setItem("spotTheLiePlatform", "play");
+        }
 
-    if (launchedFromPlay) {
-        sessionStorage.setItem("spotTheLiePlatform", "play");
-    } else if (!runningStandalone) {
-        sessionStorage.removeItem("spotTheLiePlatform");
-    }
+        const isPlayApp =
+            sessionStorage.getItem("spotTheLiePlatform") === "play";
 
-    if (sessionStorage.getItem("spotTheLiePlatform") === "play") {
+        if (!isPlayApp) {
+            return;
+        }
+
         document.documentElement.classList.add("play-app");
-    }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll("a[href]").forEach((link) => {
+                const url = new URL(link.href, window.location.origin);
+
+                if (url.origin !== window.location.origin) {
+                    return;
+                }
+
+                url.searchParams.set("source", "play");
+                link.href = url.pathname + url.search + url.hash;
+            });
+
+            document.querySelectorAll("form").forEach((form) => {
+                let sourceInput = form.querySelector(
+                    'input[name="source"]'
+                );
+
+                if (!sourceInput) {
+                    sourceInput = document.createElement("input");
+                    sourceInput.type = "hidden";
+                    sourceInput.name = "source";
+                    form.appendChild(sourceInput);
+                }
+
+                sourceInput.value = "play";
+            });
+        });
+    })();
 </script>
 
 
